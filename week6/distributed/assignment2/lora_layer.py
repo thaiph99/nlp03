@@ -6,6 +6,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 # The base class for LoRA layers
+
+
 class LoraLayer:
     def __init__(
         self,
@@ -37,7 +39,7 @@ class LoraLayer:
         # Stores the number of input and output features
         self.in_features = in_features
         self.out_features = out_features
-    
+
     # Method to update the parameters of the layer with a new adapter
     def update_layer(self, adapter_name, r, lora_alpha, lora_dropout, init_lora_weights):
         # Updates the rank and scaling factor for the adapter
@@ -110,11 +112,14 @@ class LoraLayer:
             nn.init.normal_(self.lora_embedding_B[adapter_name])
 
 # LoRA implemented in an Embedding layer
+
+
 class Embedding(nn.Embedding, LoraLayer):
     """
     The Embedding class is an extension of the PyTorch nn.Embedding class 
     and LoraLayer class to incorporate the LoRA method.
     """
+
     def __init__(
         self,
         adapter_name: str,
@@ -216,7 +221,7 @@ class Embedding(nn.Embedding, LoraLayer):
 
 # Lora is implemented in a dense (Linear) layer
 class Linear(nn.Linear, LoraLayer):
-    
+
     def __init__(
         self,
         adapter_name: str,
@@ -256,11 +261,11 @@ class Linear(nn.Linear, LoraLayer):
             warnings.warn("Already merged. Nothing to do.")
             return
         if self.r[self.active_adapter] > 0:
-            # TODO: Merge the LoRA parameters by adding the product of lora_B weights and lora_A weights (after transposing 
+            # TODO: Merge the LoRA parameters by adding the product of lora_B weights and lora_A weights (after transposing
             # if necessary) to the original weights, scaled by the LoRA scaling factor. After this operation, set the merged
             # flag to True.
-            self.weight.data += None ### YOUR CODE HERE ###
-            self.merged = None ### YOUR CODE HERE ###
+            self.weight.data += None  # YOUR CODE HERE ###
+            self.merged = None  # YOUR CODE HERE ###
 
     def unmerge(self):
         # Separate low-rank approximation from original weights
@@ -291,18 +296,19 @@ class Linear(nn.Linear, LoraLayer):
             result = F.linear(x, transpose(self.weight, self.fan_in_fan_out), bias=self.bias)
             # Changing data type for ensuring consistency
             x = x.to(self.lora_A[self.active_adapter].weight.dtype)
-            
+
             # TODO: If the LoRA adapter is active and not merged, add the output of the LoRA layers to the result. This involves
             # passing the input through lora_A, applying dropout, then passing it through lora_B. The output is scaled by the
             # LoRA scaling factor and added to the result.
-            result += None ### YOUR CODE HERE ###
+            result += None  # YOUR CODE HERE ###
         else:
             result = F.linear(x, transpose(self.weight, self.fan_in_fan_out), bias=self.bias)
-        
+
         # Reverting to the previous data type
         result = result.to(previous_dtype)
         return result
-    
+
+
 def transpose(weight, fan_in_fan_out):
     # Helper function to transpose weights if required
     return weight.T if fan_in_fan_out else weight
