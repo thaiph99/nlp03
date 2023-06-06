@@ -1,0 +1,7 @@
+torch
+gdown
+transformers
+evaluate
+rouge_score
+sklearn
+scikit-learn
