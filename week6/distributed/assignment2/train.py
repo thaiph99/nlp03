@@ -350,6 +350,7 @@ if __name__ == "__main__":
         # After that, you should set the 'local_rank' from the environment variable 'LOCAL_RANK'.
 
         # Initialize the process group ### YOUR CODE HERE ###
+        torch.distributed.init_process_group(backend='nccl')
         local_rank = 'LOCAL_RANK'  # YOUR CODE HERE ###
     else:
         os.environ['RANK'] = '0'
