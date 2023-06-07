@@ -351,7 +351,7 @@ if __name__ == "__main__":
 
         # Initialize the process group ### YOUR CODE HERE ###
         torch.distributed.init_process_group(backend='nccl')
-        local_rank = 'LOCAL_RANK'  # YOUR CODE HERE ###
+        local_rank = int(os.environ['LOCAL_RANK'])  # YOUR CODE HERE ###
     else:
         os.environ['RANK'] = '0'
         local_rank = 0
