@@ -277,7 +277,7 @@ def load_pretrained_model(local_rank, model_path: str = ""):
     # We will then use the config to initialize a LoraModelForCasualLM with the loaded model.
     # Then, print the trainable parameters of the model.
 
-    lora_config = LoraConfig(r=8, lora_alpha=16, lora_dropout=0.05, bias=None,
+    lora_config = LoraConfig(r=8, lora_alpha=16, lora_dropout=0.05, bias="none",
                              task_type="CAUSAL_LM")  # YOUR CODE HERE ###
 
     # Create LoRA model
