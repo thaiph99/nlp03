@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 
 from peft import LoraConfig, get_peft_model
-from transformers import AutoConfig, AutoTokenizer
+from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM
 
 from contextlib import nullcontext
 
@@ -268,7 +268,9 @@ def load_pretrained_model(local_rank, model_path: str = ""):
     # TODO: Load a pretrained AutoModelForCausalLM from the 'model_path' in float16 data type.
     # Make sure to set 'device_map' to '{"": torch.device(f"cuda:{local_rank}")}' for DDP training.
 
-    model = torch.load(model_path, map_location=torch.device(f"cuda:{local_rank}")).half()  # YOUR CODE HERE ###
+    model = AutoModelForCausalLM.from_pretrained(
+        model_path, dtype=torch.float16, device_map={"": torch.device(f"cuda:{local_rank}")}
+    )  # YOUR CODE HERE ###
 
     # TODO: Create a LoraConfig with the parameters: r=8, lora_alpha=16,
     # lora_dropout=0.05, bias="none", task_type="CAUSAL_LM".
