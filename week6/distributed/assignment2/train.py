@@ -16,6 +16,7 @@ from torch.distributed import destroy_process_group
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.data.sampler import SequentialSampler
 from torch.utils.data import DataLoader
+from torch.nn.parallel import DistributedDataParallel as DDP
 
 
 import warnings
@@ -80,7 +81,7 @@ class Trainer:
         # TODO: Initialize the DistributedDataParallel wrapper for the model.
         # You would need to pass the model and specify the device IDs
         # and output device for the data parallelism.
-        self.model = None  # YOUR CODE HERE ###
+        self.model = DDP(model, device_ids=[self.gpu_id], output_device=self.gpu_id)  # YOUR CODE HERE ###
 
     def _run_batch(self, batch):
         """
@@ -345,14 +346,14 @@ if __name__ == "__main__":
     eval_freq = 150
 
     # TODO: Choose strategy
-    distributed_strategy = "no"  # YOUR CODE HERE ###
+    distributed_strategy = "ddp"  # YOUR CODE HERE ###
 
     if distributed_strategy == "ddp":
         # TODO: Initialize the process group for distributed data parallelism with nccl backend.
         # After that, you should set the 'local_rank' from the environment variable 'LOCAL_RANK'.
 
         # Initialize the process group ### YOUR CODE HERE ###
-        torch.distributed.init_process_group(backend='nccl', rank=os.environ["RANK"])
+        torch.distributed.init_process_group(backend='nccl')
         local_rank = int(os.environ['LOCAL_RANK'])  # YOUR CODE HERE ###
     else:
         os.environ['RANK'] = '0'
