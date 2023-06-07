@@ -5,6 +5,7 @@ from tqdm import tqdm
 
 from peft import LoraConfig, get_peft_model
 from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, DataCollatorForSeq2Seq
+from torch.cuda.amp import GradScaler, autocast
 
 from contextlib import nullcontext
 
@@ -72,8 +73,8 @@ class Trainer:
             self.ctx = nullcontext()
         else:
             # TODO Otherwise, use 'torch.amp.autocast' context with the specified dtype, and initialize GradScaler if mixed_precision_dtype is float16.
-            self.ctx = None  # YOUR CODE HERE ###
-            self.gradscaler = None  # YOUR CODE HERE ###
+            self.ctx = autocast(device_type='cuda', dtype=mixed_precision_dtype)  # YOUR CODE HERE ###
+            self.gradscaler = GradScaler()  # YOUR CODE HERE ###
 
     def _set_ddp_training(self):
         # TODO: Initialize the DistributedDataParallel wrapper for the model.
@@ -100,7 +101,7 @@ class Trainer:
         # TODO: If 'mixed_precision_dtype' is torch.float16, you have to modify the backward using the gradscaler.
         if self.mixed_precision_dtype == torch.float16:
             ### YOUR CODE HERE ###
-            pass
+            self.gradscaler.scale(loss).backward()
         else:
             loss.backward()
 
@@ -143,7 +144,8 @@ class Trainer:
                     ### YOUR CODE HERE ###
                     # TODO: optimizer step
                     # TODO: update scaler factor
-                    pass
+                    self.gradscaler.step(self.optimizer)
+                    self.gradscaler.update()
                 else:
                     self.optimizer.step()
                 self.optimizer.zero_grad()
@@ -350,7 +352,7 @@ if __name__ == "__main__":
         # After that, you should set the 'local_rank' from the environment variable 'LOCAL_RANK'.
 
         # Initialize the process group ### YOUR CODE HERE ###
-        torch.distributed.init_process_group(backend='nccl', rank=os.environ["RANK"]) 
+        torch.distributed.init_process_group(backend='nccl', rank=os.environ["RANK"])
         local_rank = int(os.environ['LOCAL_RANK'])  # YOUR CODE HERE ###
     else:
         os.environ['RANK'] = '0'
@@ -368,7 +370,7 @@ if __name__ == "__main__":
         max_length=max_length,
         batch_size=batch_size,
         gpu_id=local_rank,
-        mixed_precision_dtype=None,  # TODO: Set the mixed precision data type, hint use float16
+        mixed_precision_dtype=torch.float16,  # TODO: Set the mixed precision data type, hint use float16
         tokenizer=tokenizer,
         output_dir=OUTPUT_DIR,
         is_ddp_training=True if distributed_strategy == "ddp" else False,
