@@ -343,14 +343,14 @@ if __name__ == "__main__":
     eval_freq = 150
 
     # TODO: Choose strategy
-    distributed_strategy = "ddp"  # YOUR CODE HERE ###
+    distributed_strategy = "no"  # YOUR CODE HERE ###
 
     if distributed_strategy == "ddp":
         # TODO: Initialize the process group for distributed data parallelism with nccl backend.
         # After that, you should set the 'local_rank' from the environment variable 'LOCAL_RANK'.
 
         # Initialize the process group ### YOUR CODE HERE ###
-        torch.distributed.init_process_group(backend='nccl', rank=os.environ["RANK"], world_size=os.environ["WORLD_SIZE"])
+        torch.distributed.init_process_group(backend='nccl', rank=os.environ["RANK"]) 
         local_rank = int(os.environ['LOCAL_RANK'])  # YOUR CODE HERE ###
     else:
         os.environ['RANK'] = '0'
