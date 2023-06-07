@@ -350,7 +350,7 @@ if __name__ == "__main__":
         # After that, you should set the 'local_rank' from the environment variable 'LOCAL_RANK'.
 
         # Initialize the process group ### YOUR CODE HERE ###
-        local_rank = None  # YOUR CODE HERE ###
+        local_rank = 'LOCAL_RANK'  # YOUR CODE HERE ###
     else:
         os.environ['RANK'] = '0'
         local_rank = 0
