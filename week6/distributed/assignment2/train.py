@@ -121,11 +121,10 @@ class Trainer:
         epoch_loss = 0
         self.model.train()
 
-        # if _is_master_process():
-        #     train_progress_bar = tqdm(train_dataloader, desc=f"Epoch {epoch + 1} [Training]", position=0, leave=False)
-        # else:
-        #     train_progress_bar = train_dataloader
-        train_progress_bar = train_dataloader
+        if _is_master_process():
+            train_progress_bar = tqdm(train_dataloader, desc=f"Epoch {epoch + 1} [Training]", position=0, leave=False)
+        else:
+            train_progress_bar = train_dataloader
 
         # Add counter for gradient accumulation
         print("type of train progress bar: {0}".format(type(train_progress_bar)))
