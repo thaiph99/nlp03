@@ -307,9 +307,9 @@ class Linear(nn.Linear, LoraLayer):
             # passing the input through lora_A, applying dropout, then passing it through lora_B. The output is scaled by the
             # LoRA scaling factor and added to the result.
             result += (
-                self.lora_A[self.active_adapter].weight
-                @ self.lora_dropout[self.active_adapter](x)
-                @ self.lora_B[self.active_adapter].weight
+                self.lora_dropout[self.active_adapter](x)
+                @ self.lora_A[self.active_adapter].weight.transpose(0, 1)
+                @ self.lora_B[self.active_adapter].weight.transpose(0, 1)
             ) * self.scaling  # YOUR CODE HERE ###
         else:
             result = F.linear(x, transpose(self.weight, self.fan_in_fan_out), bias=self.bias)
