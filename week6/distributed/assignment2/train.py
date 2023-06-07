@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 
 from peft import LoraConfig, get_peft_model
-from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, DataCollatorForSeq2Seq
 
 from contextlib import nullcontext
 
@@ -12,6 +12,9 @@ from lora_model import LoraModelForCasualLM
 from utils.common import download_from_driver
 from prepare_data import create_datasets
 from torch.distributed import destroy_process_group
+from torch.utils.data.distributed import DistributedSampler
+from torch.utils.data.sampler import SequentialSampler
+from torch.utils.data import DataLoader
 
 
 import warnings
@@ -123,7 +126,7 @@ class Trainer:
         # else:
         #     train_progress_bar = train_dataloader
         train_progress_bar = train_dataloader
-        
+
         # Add counter for gradient accumulation
         print("type of train progress bar: {0}".format(type(train_progress_bar)))
         steps = 0
@@ -172,13 +175,35 @@ class Trainer:
         # use 'DistributedSampler' for 'sampler' argument, else use 'None'.
         # Use 'DataCollatorForSeq2Seq' for 'collate_fn', passing 'tokenizer', padding settings, and return_tensors="pt".
 
-        data_trainloader = None  # YOUR CODE HERE ###
+        if self.is_ddp_training:
+            sampler = DistributedSampler(train_dataset)
+        else:
+            sampler = None
+
+        # data_trainloader = None  # YOUR CODE HERE ###
+        collate_fn = DataCollatorForSeq2Seq(tokenizer=self.tokenizer,
+                                            padding=True,
+                                            return_tensors="pt")
+
+        data_trainloader = DataLoader(train_dataset,
+                                      batch_size=self.batch_size,
+                                      sampler=sampler,
+                                      collate_fn=collate_fn)
 
         # TODO: Prepare the evaluation DataLoader. Initialize 'DataLoader' with 'eval_dataset',
         # the appropriate 'batch_size', and 'SequentialSampler' for 'sampler'.
         # Use 'DataCollatorForSeq2Seq' for 'collate_fn', passing 'tokenizer', padding settings, and return_tensors type.
 
-        data_testloader = None  # YOUR CODE HERE ###
+        # data_testloader = None  # YOUR CODE HERE ###
+
+        collate_fn = DataCollatorForSeq2Seq(tokenizer=self.tokenizer,
+                                            padding=True,
+                                            return_tensors="pt")
+
+        data_testloader = DataLoader(eval_dataset,
+                                     batch_size=self.batch_size,
+                                     sampler=SequentialSampler(eval_dataset),
+                                     collate_fn=collate_fn)
 
         return data_trainloader, data_testloader
 
