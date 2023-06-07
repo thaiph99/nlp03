@@ -123,12 +123,11 @@ class Trainer:
         else:
             train_progress_bar = train_dataloader
         
-        print("type of train progress bar: {0}".format(type(train_progress_bar)))
-
         # Add counter for gradient accumulation
+        print("type of train progress bar: {0}".format(type(train_progress_bar)))
         steps = 0
         self.optimizer.zero_grad()  # Reset gradients at the beginning of each epoch
-        for step, batch in enumerate(train_progress_bar):
+        for batch in train_progress_bar:
             steps += 1
             batch = {key: value.to(self.gpu_id) for key, value in batch.items()}
             loss = self._run_batch(batch)
