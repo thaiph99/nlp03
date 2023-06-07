@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 from peft import LoraConfig, get_peft_model
 from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, DataCollatorForSeq2Seq
-from torch.cuda.amp import GradScaler, autocast
+from torch.cuda.amp import GradScaler
 
 from contextlib import nullcontext
 
@@ -73,7 +73,7 @@ class Trainer:
             self.ctx = nullcontext()
         else:
             # TODO Otherwise, use 'torch.amp.autocast' context with the specified dtype, and initialize GradScaler if mixed_precision_dtype is float16.
-            self.ctx = autocast(device_type='cuda', dtype=mixed_precision_dtype)  # YOUR CODE HERE ###
+            self.ctx = torch.amp.autocast(device_type='cuda', dtype=mixed_precision_dtype)  # YOUR CODE HERE ###
             self.gradscaler = GradScaler()  # YOUR CODE HERE ###
 
     def _set_ddp_training(self):
